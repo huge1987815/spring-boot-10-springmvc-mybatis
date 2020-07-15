@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.huge.springboot.dao.StudentDao">
+    <!--删除学生信息-->
+    <delete id="deleteStu">
+        delete from tb_student where sid=#{sid}
+    </delete>
+    <!--根据学号修改学生信息-->
+    <update id="updateStu">
+        update tb_student
+        <set>
+            <if test="sname!=null and sname!=''">sname=#{sname},</if>
+            <if test="sex!=null and sex!=''">sex=#{sex},</if>
+            <if test="age>=0">age=#{age},</if>
+            <if test="cid>0">cid=#{cid}</if>
+        </set>
+        <where>
+            sid=#{sid}
+        </where>
+    </update>
+    <!--根据学号查询学生信息-->
+    <select id="findStudentBySid" resultType="student">
+        select * from tb_student where sid=#{sid};
+    </select>
+    <!--添加学生信息-->
+    <insert id="addStudent">
+        insert into tb_student values(null,#{sname},#{sex},#{age},#{cid})
+    </insert>
+    <!--查询所有班级信息-->
+    <select id="findAllClass" resultType="sclass">
+        select * from tb_class
+    </select>
+
+    <!--查询所有学生信息-->
+    <resultMap id="findAllStudentResultMap" type="studentVo">
+        <!--学生信息-->
+        <id property="sid" column="sid"/>
+        <result property="sname" column="sname"/>
+        <result property="sex" column="sex"/>
+        <result property="age" column="age"/>
+        <!--班级信息-->
+        <association property="sclass" javaType="sclass">
+            <id column="cid" property="cid"/>
+            <result property="cname" column="cname"/>
+        </association>
+    </resultMap>
+    <select id="findAllStudent" resultMap="findAllStudentResultMap">
+        select s.sid,s.sname,s.sex,s.age,c.cname
+        from tb_student s join tb_class c
+        on s.cid=c.cid
+        <where>
+            <if test="sname!=null and sname!=''">
+                s.sname like concat('%',#{sname},'%')
+            </if>
+            <if test="sex!=null and sex!=''">
+                and s.sex=#{sex}
+            </if>
+            <if test="cid>0">
+                and s.cid=#{cid}
+            </if>
+        </where>
+    </select>
+</mapper>
